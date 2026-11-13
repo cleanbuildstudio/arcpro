@@ -217,15 +217,26 @@ export default function Projects() {
                 })}
               </div>
 
-              {/* CTA Button */}
-              <div>
+              {/* CTA Link */}
+              <div className="pt-1">
                 <a
                   href="/projects"
-                  className="group inline-flex items-center gap-2 bg-[#4ec86e] hover:bg-[#45b764] hover:scale-[1.03] active:scale-95 text-black font-semibold text-[14px] sm:text-[15px] px-6 py-3 rounded-full transition-all duration-200 shadow-sm cursor-pointer"
+                  className="group relative inline-flex items-center gap-2.5 text-black text-[14px] sm:text-[15px] font-medium tracking-tight transition-transform duration-200 hover:scale-[1.03] active:scale-95 origin-left cursor-pointer select-none py-1 w-fit"
                 >
-                  <span> View all projects</span>
+                  <span className="relative inline-block">
+                    <span>View all projects</span>
+                    {/* Animated passing underline */}
+                    <span
+                      className="absolute left-0 -bottom-[2px] w-full h-[1.5px] bg-black pointer-events-none origin-right transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] scale-x-100 group-hover:scale-x-0"
+                      aria-hidden="true"
+                    />
+                    <span
+                      className="absolute left-0 -bottom-[2px] w-full h-[1.5px] bg-black pointer-events-none origin-left transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] delay-[100ms] scale-x-0 group-hover:scale-x-100"
+                      aria-hidden="true"
+                    />
+                  </span>
                   <svg
-                    className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
+                    className="w-4 h-4 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -233,7 +244,7 @@ export default function Projects() {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2.2}
+                      strokeWidth={2}
                       d="M14 5l7 7m0 0l-7 7m7-7H3"
                     />
                   </svg>

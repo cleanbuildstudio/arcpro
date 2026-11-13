@@ -94,3 +94,22 @@ body {
 .animated-underline:hover::after {
   transform: scaleX(1);
 }
+
+/* =========================================================================
+   Arc Projects Minimalist Page Transition (Swup Style)
+   ========================================================================= */
+@keyframes arcPageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition-container {
+  animation: arcPageEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}

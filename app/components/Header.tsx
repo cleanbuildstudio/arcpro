@@ -364,14 +364,14 @@ export default function Header({
                             transitionDelay: isMenuOpen ? `${160 + idx * 45}ms` : "0ms",
                           }}
                         >
-                          <a
+                          <Link
                             href={item.href}
                             onMouseEnter={() => setHoveredMenuIndex(idx)}
                             onClick={() => setIsMenuOpen(false)}
                             className="block text-[34px] sm:text-[44px] md:text-[50px] lg:text-[58px] font-bold tracking-[-0.03em] leading-[1.1] transition-opacity duration-[250ms] ease-out group-hover/modal-nav:opacity-30 hover:!opacity-100 select-none w-fit cursor-pointer text-white"
                           >
                             {item.name}
-                          </a>
+                          </Link>
                         </div>
                       </div>
                     ))}
@@ -478,7 +478,7 @@ export default function Header({
             { name: "Gallery", href: "/#gallery" },
             { name: "Contact", href: "/contact" },
           ].map((item) => (
-            <a
+            <Link
               key={item.name}
               href={item.href}
               className={`text-[14px] lg:text-[15px] font-normal transition-opacity duration-[350ms] ease-[cubic-bezier(0.23,1,0.32,1)] group-hover/nav:opacity-30 hover:!opacity-100 ${
@@ -486,7 +486,7 @@ export default function Header({
               }`}
             >
               {item.name}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -508,9 +508,11 @@ export default function Header({
         <div className="flex md:hidden items-center gap-3">
           <Link
             href="/contact"
-            className="sm:hidden inline-flex items-center justify-center bg-black text-white text-[12px] font-medium px-3.5 py-1.5 rounded-full border border-white/20 active:scale-95 hover:scale-[1.03] transition-transform duration-200"
+            className={`sm:hidden inline-flex items-center justify-center whitespace-nowrap bg-black text-white text-[11px] min-[380px]:text-[12px] font-medium px-3 min-[380px]:px-3.5 py-1.5 rounded-full border ${
+              isLight ? "border-black/10" : "border-white/20"
+            } active:scale-95 hover:scale-[1.03] transition-transform duration-200 cursor-pointer`}
           >
-            Book
+            Book Consultation
           </Link>
           <button
             onClick={() => setIsMenuOpen(true)}

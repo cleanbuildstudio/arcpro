@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
+import Link from "next/link";
 import Header from "./Header";
 
 const WORDS = [
@@ -21,37 +22,34 @@ const HERO_PROJECTS = [
     id: "ojas-24",
     tag: "(OJAS 24)",
     title: "OJAS 24",
-    location: "Mysore, Karnataka",
+    location: "Shoolagiri, Tamil Nadu",
     type: "video" as const,
-    src: "/hero.mp4",
-    link: "https://youtu.be/PHgGsJIZ4V4",
+    videoSrc: "/hero.mp4",
+    thumbnailSrc: "/live-projects/ojas-24-hd.jpg",
+    link: "/projects/ojas-24",
+    startTime: 0,
   },
   {
-    id: "casa-terra",
-    tag: "(CASA TERRA)",
-    title: "Casa Terra",
-    location: "Alibaug, Maharashtra",
-    type: "image" as const,
-    src: "/hero-casa-terra.jpg",
-    link: "#casa-terra",
+    id: "the-palagiri-house",
+    tag: "(THE PALAGIRI HOUSE)",
+    title: "The Palagiri House",
+    location: "Kochi, Kerala",
+    type: "video" as const,
+    videoSrc: "/hero-palagiri.mp4",
+    thumbnailSrc: "/live-projects/the-palagiri-house-hd.png",
+    link: "/projects/the-palagiri-house",
+    startTime: 0,
   },
   {
-    id: "block-west",
-    tag: "(BLOCK WEST)",
-    title: "Block West",
-    location: "Jalgaon, Maharashtra",
-    type: "image" as const,
-    src: "/hero-block-west.jpg",
-    link: "#block-west",
-  },
-  {
-    id: "glass-house",
-    tag: "(THE GLASS HOUSE)",
-    title: "The Glass House",
-    location: "Coimbatore, Tamil Nadu",
-    type: "image" as const,
-    src: "/hero-glass-house.jpg",
-    link: "#glass-house",
+    id: "the-skewed-house",
+    tag: "(THE SKEWED HOUSE)",
+    title: "The Skewed House",
+    location: "Palakkad, Kerala",
+    type: "video" as const,
+    videoSrc: "/hero-skewed.mp4",
+    thumbnailSrc: "/live-projects/the-skewed-house-hd.png",
+    link: "/projects/the-skewed-house",
+    startTime: 0,
   },
 ];
 
@@ -64,13 +62,8 @@ interface OhViewProjectLinkProps {
 }
 
 function OhViewProjectLink({ href, label, target, rel, className = "" }: OhViewProjectLinkProps) {
-  return (
-    <a
-      href={href}
-      target={target}
-      rel={rel}
-      className={`group relative inline-flex items-center gap-x-2.5 cursor-pointer select-none text-[13px] sm:text-[14px] font-medium uppercase tracking-[0.04em] text-white ${className}`}
-    >
+  const content = (
+    <>
       {/* 1. Rolling Elevator Text Container */}
       <span className="relative inline-block overflow-hidden h-[1.15em] leading-[1.15em]">
         <span
@@ -98,12 +91,30 @@ function OhViewProjectLink({ href, label, target, rel, className = "" }: OhViewP
         className="absolute left-0 -bottom-[3px] w-full h-[1px] bg-white pointer-events-none origin-right transition-transform duration-[700ms] ease-[cubic-bezier(0.16,1,0.3,1)] delay-0 scale-x-0 group-hover:origin-left group-hover:scale-x-100 group-hover:delay-[180ms]"
         aria-hidden="true"
       />
-    </a>
+    </>
+  );
+
+  const sharedClasses = `group relative inline-flex items-center gap-x-2.5 cursor-pointer select-none text-[13px] sm:text-[14px] font-medium uppercase tracking-[0.04em] text-white ${className}`;
+
+  if (href.startsWith("http")) {
+    return (
+      <a href={href} target={target} rel={rel} className={sharedClasses}>
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className={sharedClasses}>
+      {content}
+    </Link>
   );
 }
 
 export default function Hero() {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const [videoLoaded, setVideoLoaded] = useState<Record<string, boolean>>({});
   const headlineRef = useRef<HTMLDivElement>(null);
   const middleRowRef = useRef<HTMLDivElement>(null);
 
@@ -125,32 +136,42 @@ export default function Hero() {
   const [index, setIndex] = useState(0);
   const [isSliding, setIsSliding] = useState(false);
 
+  // Play active project's video and pause inactive videos to conserve GPU/memory
   useEffect(() => {
-    // Ensure autoplay starts reliably
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {
-        // Autoplay policy handled by muted
-      });
-    }
-  }, []);
+    videoRefs.current.forEach((vid, idx) => {
+      if (!vid) return;
+      if (idx === activeProject) {
+        const start = HERO_PROJECTS[idx].startTime || 0;
+        try {
+          vid.currentTime = start;
+        } catch (_) {}
+        vid.play().catch(() => {});
+      } else {
+        vid.pause();
+      }
+    });
+  }, [activeProject]);
+
+  const handleVideoCanPlay = (id: string) => {
+    setVideoLoaded((prev) => ({ ...prev, [id]: true }));
+  };
 
   // Progressive timer for hero projects
   useEffect(() => {
     let lastTime = performance.now();
+    let currentProgress = 0;
     let frameId: number;
 
     const tick = (now: number) => {
       const delta = now - lastTime;
       lastTime = now;
 
-      setProgress((prev) => {
-        const next = prev + (delta / PROJECT_DURATION) * 100;
-        if (next >= 100) {
-          setActiveProject((curr) => (curr + 1) % HERO_PROJECTS.length);
-          return 0;
-        }
-        return next;
-      });
+      currentProgress += (delta / PROJECT_DURATION) * 100;
+      if (currentProgress >= 100) {
+        currentProgress = 0;
+        setActiveProject((curr) => (curr + 1) % HERO_PROJECTS.length);
+      }
+      setProgress(currentProgress);
 
       frameId = requestAnimationFrame(tick);
     };
@@ -167,7 +188,7 @@ export default function Hero() {
       cancelAnimationFrame(animId);
       animId = requestAnimationFrame(() => {
         const scrollY = window.scrollY;
-        const heroHeight = window.innerHeight;
+        const heroHeight = heroRef.current ? heroRef.current.offsetHeight : window.innerHeight;
 
         // Apply downward translation as user scrolls towards next section
         if (scrollY <= heroHeight * 1.2) {
@@ -219,56 +240,63 @@ export default function Hero() {
 
   return (
     <section
-      className="relative w-full h-screen min-h-[640px] max-h-[1080px] bg-black text-white font-['Helvetica_Neue',Helvetica,Arial,sans-serif] z-10"
+      ref={heroRef}
+      className="relative w-full h-[60vh] min-h-0 md:h-screen md:min-h-[640px] md:max-h-[1080px] bg-black text-white font-['Helvetica_Neue',Helvetica,Arial,sans-serif] z-10"
       aria-label="ArchPro Hero Section"
     >
-      {/* ---------------- BACKGROUND MEDIA (CROSS-FADING) ---------------- */}
+      {/* ---------------- BACKGROUND MEDIA (3 PROJECT VIDEOS WITH THUMBNAILS UNTIL LOADED) ---------------- */}
       <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none z-0">
-        {/* Project 1 (OJAS 24): Video */}
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          className={`absolute inset-0 w-full h-full object-cover pointer-events-none select-none transition-opacity duration-1000 ease-in-out ${
-            activeProject === 0 ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <source src="/hero.mp4" type="video/mp4" />
-        </video>
+        {HERO_PROJECTS.map((proj, idx) => {
+          const isActive = activeProject === idx;
+          const isLoaded = videoLoaded[proj.id];
 
-        {/* Projects 2, 3, 4: High-Res Hero Images with slow cinematic drift */}
-        {HERO_PROJECTS.slice(1).map((proj, idx) => {
-          const projectIndex = idx + 1;
-          const isActive = activeProject === projectIndex;
           return (
             <div
               key={proj.id}
               className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-                isActive ? "opacity-100" : "opacity-0"
+                isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
               }`}
             >
+              {/* High-Res Thumbnail Image: visible instantly until video starts playing */}
               <img
-                src={proj.src}
+                src={proj.thumbnailSrc}
                 alt={proj.title}
-                className={`w-full h-full object-cover transition-transform duration-[7000ms] ease-out ${
-                  isActive ? "scale-105" : "scale-100"
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out ${
+                  isLoaded ? "opacity-0 pointer-events-none" : "opacity-100"
                 }`}
               />
+
+              {/* Native HTML5 Background Video */}
+              <video
+                ref={(el) => {
+                  videoRefs.current[idx] = el;
+                }}
+                autoPlay={idx === 0}
+                loop
+                muted
+                playsInline
+                preload={idx === 0 ? "auto" : "metadata"}
+                poster={proj.thumbnailSrc}
+                onCanPlay={() => handleVideoCanPlay(proj.id)}
+                onPlaying={() => handleVideoCanPlay(proj.id)}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out ${
+                  isLoaded ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                <source src={proj.videoSrc} type="video/mp4" />
+              </video>
             </div>
           );
         })}
 
         {/* Ambient Overlay for text readability */}
-        <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-black/30 pointer-events-none z-20" />
 
         {/* Subtle top gradient for header clarity */}
-        <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-24 sm:h-36 bg-gradient-to-b from-black/60 to-transparent pointer-events-none z-20" />
 
         {/* Subtle bottom gradient for headline & progress bar clarity */}
-        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black/85 via-black/45 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-36 sm:h-48 md:h-64 bg-gradient-to-t from-black/85 via-black/45 to-transparent pointer-events-none z-20" />
       </div>
 
       {/* ---------------- MAIN FOREGROUND CONTENT ---------------- */}
@@ -276,43 +304,27 @@ export default function Hero() {
         {/* TOP: NAVIGATION BAR (REUSABLE HEADER COMPONENT) */}
         <Header theme="dark" />
 
-        {/* MIDDLE ROW: (PROJECT NAME) on the left & View Project on the right */}
-        {/* With mix-blend-difference so both project name & view project dynamically invert over the hero background image/video */}
+        {/* MIDDLE ROW: View Project on the right side */}
+        {/* With mix-blend-difference so view project dynamically inverts over the hero background image/video */}
         <div
           ref={middleRowRef}
-          className="w-full flex items-center justify-between py-12 will-change-transform mix-blend-difference text-white"
+          className="w-full flex items-center justify-end py-4 sm:py-8 md:py-12 will-change-transform mix-blend-difference text-white"
         >
-          {/* Left Tag with Project Name Transition 
-          <div className="flow-hidden h-[24px] sm:text-[8px] flex items-center">
-            {HERO_PROJECTS.map((proj, idx) => (
-              <span
-                key={proj.id}
-                className={`text-[14px] sm:text-[8px] font-normal tracking-wide text-white select-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  idx === activeProject
-                    ? "opacity-100 translate-y-0"
-                    : "absolute left-0 opacity-0 translate-y-3 pointer-events-none"
-                }`}
-              >
-                {proj.tag}
-              </span>
-            ))}
-          </div>    */}
-
           {/* Right Action: OH Architecture style View Project Link with rolling text & circle morph */}
           <OhViewProjectLink
-          
-            key={HERO_PROJECTS[activeProject].id}    
+            key={HERO_PROJECTS[activeProject].id}
             href={HERO_PROJECTS[activeProject].link}
             label="View Project"
             target={HERO_PROJECTS[activeProject].type === "video" ? "_blank" : undefined}
             rel={HERO_PROJECTS[activeProject].type === "video" ? "noopener noreferrer" : undefined}
+            className="ml-auto"
           />
         </div>
 
         {/* BOTTOM SECTION: Typography Headline */}
         <div
           ref={headlineRef}
-          className="w-full pb-4 sm:pb-6 will-change-transform"
+          className="w-full pb-2 sm:pb-4 md:pb-6 will-change-transform"
         >
           <h1 className="max-w-5xl text-[25px] min-[380px]:text-[28px] min-[420px]:text-[32px] sm:text-[48px] md:text-[56px] lg:text-[64px] xl:text-[70px] font-bold tracking-[-0.03em] leading-[1.08] text-white select-none">
             <span className="block">
