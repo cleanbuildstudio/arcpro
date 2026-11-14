@@ -367,8 +367,6 @@ export default function Projects() {
                     }}
                     className="group cursor-pointer flex flex-col will-change-transform"
                     style={{
-                      transition:
-                        "transform 0.4s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.4s ease-out",
                       transformOrigin: "center center",
                     }}
                   >
@@ -412,8 +410,6 @@ export default function Projects() {
                     }}
                     className="group cursor-pointer flex flex-col will-change-transform"
                     style={{
-                      transition:
-                        "transform 0.4s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.4s ease-out",
                       transformOrigin: "center center",
                     }}
                   >

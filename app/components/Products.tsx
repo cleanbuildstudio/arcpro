@@ -220,6 +220,7 @@ export default function Products() {
         {/* Product Cards: Swipable on mobile screens, responsive grid on desktop */}
         <div
           ref={scrollContainerRef}
+          data-lenis-prevent
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUpOrLeave}

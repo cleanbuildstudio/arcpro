@@ -134,8 +134,10 @@ export default function Header({
 
   // Lock scroll when menu is open
   useEffect(() => {
+    const lenis = (window as unknown as { lenis?: { stop: () => void; start: () => void } }).lenis;
     if (isMenuOpen) {
       document.body.style.overflow = "hidden";
+      lenis?.stop();
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
           setIsMenuOpen(false);
@@ -144,10 +146,12 @@ export default function Header({
       window.addEventListener("keydown", handleKeyDown);
       return () => {
         document.body.style.overflow = "unset";
+        lenis?.start();
         window.removeEventListener("keydown", handleKeyDown);
       };
     } else {
       document.body.style.overflow = "unset";
+      lenis?.start();
     }
   }, [isMenuOpen]);
 
