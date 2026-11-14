@@ -175,15 +175,15 @@ export default function Products() {
           </p>
         </div>
 
-        {/* Product Cards Grid: Gulled-style Sharp Architectural Borders & Hover Swap */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-6 lg:gap-5 items-start">
+        {/* Product Cards: Swipable on mobile screens, responsive grid on desktop */}
+        <div className="flex sm:grid overflow-x-auto sm:overflow-visible snap-x snap-mandatory scroll-smooth sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-5 items-start pb-4 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar touch-pan-x">
           {PRODUCT_CATEGORIES.map((cat) => {
             const isSaved = savedItems.has(cat.id);
 
             return (
               <article
                 key={cat.id}
-                className="group flex flex-col cursor-pointer select-none"
+                className="group flex flex-col cursor-pointer select-none shrink-0 sm:shrink w-[76vw] max-w-[320px] sm:w-auto sm:max-w-none snap-start"
               >
                 {/* Gulled-style Card Image Box */}
                 <div className="relative w-full aspect-[3/4] bg-[#ECECEC] rounded-none overflow-hidden border border-neutral-200/60 transition-all duration-300">
@@ -265,6 +265,8 @@ export default function Products() {
               </article>
             );
           })}
+          {/* Trailing spacer to preserve comfortable right padding on mobile swipe */}
+          <div className="shrink-0 w-2 sm:hidden pointer-events-none" aria-hidden="true" />
         </div>
       </div>
     </section>
