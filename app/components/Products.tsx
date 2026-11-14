@@ -89,7 +89,49 @@ export default function Products() {
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set());
   const [counterStep, setCounterStep] = useState(0); // 0: 999, 1: 1,000+
   const sectionRef = useRef<HTMLElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isDownRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+  const hasMovedRef = useRef(false);
   const hasAnimatedRef = useRef(false);
+
+  // Mouse drag-to-scroll handlers so user can click & drag on photos/cards to scroll
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0 || !scrollContainerRef.current) return;
+    isDownRef.current = true;
+    hasMovedRef.current = false;
+    startXRef.current = e.pageX - scrollContainerRef.current.offsetLeft;
+    scrollLeftRef.current = scrollContainerRef.current.scrollLeft;
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDownRef.current || !scrollContainerRef.current) return;
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = x - startXRef.current;
+    if (Math.abs(walk) > 3) {
+      hasMovedRef.current = true;
+      scrollContainerRef.current.style.scrollSnapType = "none";
+      scrollContainerRef.current.style.scrollBehavior = "auto";
+      scrollContainerRef.current.scrollLeft = scrollLeftRef.current - walk;
+    }
+  };
+
+  const handleMouseUpOrLeave = () => {
+    if (isDownRef.current && scrollContainerRef.current) {
+      scrollContainerRef.current.style.scrollSnapType = "";
+      scrollContainerRef.current.style.scrollBehavior = "";
+    }
+    isDownRef.current = false;
+  };
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (hasMovedRef.current) {
+      e.stopPropagation();
+      e.preventDefault();
+      hasMovedRef.current = false;
+    }
+  };
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -176,7 +218,15 @@ export default function Products() {
         </div>
 
         {/* Product Cards: Swipable on mobile screens, responsive grid on desktop */}
-        <div className="flex sm:grid overflow-x-auto sm:overflow-visible snap-x snap-mandatory scroll-smooth sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-5 items-start pb-4 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar touch-pan-x">
+        <div
+          ref={scrollContainerRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUpOrLeave}
+          onMouseLeave={handleMouseUpOrLeave}
+          onClickCapture={handleClickCapture}
+          className="flex sm:grid overflow-x-auto sm:overflow-visible snap-x snap-mandatory scroll-smooth sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 lg:gap-5 items-start pb-4 sm:pb-0 -mx-4 px-6 sm:mx-0 sm:px-0 scroll-pl-6 sm:scroll-pl-0 no-scrollbar cursor-grab active:cursor-grabbing sm:cursor-default"
+        >
           {PRODUCT_CATEGORIES.map((cat) => {
             const isSaved = savedItems.has(cat.id);
 
@@ -194,8 +244,9 @@ export default function Products() {
                         src={cat.packshot}
                         alt={`${cat.title} Packshot`}
                         fill
+                        draggable={false}
                         sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                        className="object-contain mix-blend-multiply transition-transform duration-500 ease-out group-hover:scale-105"
+                        className="object-contain mix-blend-multiply transition-transform duration-500 ease-out group-hover:scale-105 pointer-events-none select-none"
                       />
                     </div>
                   </div>
@@ -206,8 +257,9 @@ export default function Products() {
                       src={cat.lifestyle}
                       alt={`${cat.title} Lifestyle in-situ`}
                       fill
+                      draggable={false}
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                      className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03]"
+                      className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] pointer-events-none select-none"
                     />
                   </div>
 
@@ -266,7 +318,7 @@ export default function Products() {
             );
           })}
           {/* Trailing spacer to preserve comfortable right padding on mobile swipe */}
-          <div className="shrink-0 w-2 sm:hidden pointer-events-none" aria-hidden="true" />
+          <div className="shrink-0 w-6 sm:hidden pointer-events-none" aria-hidden="true" />
         </div>
       </div>
     </section>

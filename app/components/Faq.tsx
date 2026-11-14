@@ -85,7 +85,7 @@ export default function Faq() {
   return (
     <section
       id="faqs"
-      className="relative w-full text-black font-['Helvetica_Neue',Helvetica,Arial,sans-serif] py-20 sm:py-24 lg:py-20 selection:bg-black selection:text-black overflow-hidden"
+      className="relative w-full text-black font-['Helvetica_Neue',Helvetica,Arial,sans-serif] px-4 sm:px-0 py-20 sm:py-24 lg:py-20 selection:bg-black selection:text-black overflow-hidden"
       aria-label="Frequently Asked Questions"
     >
       <div className="max-w-[1440px] mx-auto px-0">

@@ -26,74 +26,132 @@ const PROCESS_STEPS = [
   },
 ];
 
-const PROJECTS_COL_1 = [
+interface ProjectItem {
+  id: string;
+  num: string;
+  title: string;
+  location: string;
+  year: string;
+  category: string;
+  image: string;
+  aspect: string;
+  mobileWidth: string;
+  mobileAlign: string;
+}
+
+const PROJECTS_COL_1: ProjectItem[] = [
   {
     id: "ojas-24",
+    num: "01",
     title: "OJAS 24",
     location: "Mysore, Karnataka",
+    year: "2026",
     category: "Architecture & Interior",
     image: "/projects/project-1.jpg",
     aspect: "aspect-[4/3]",
+    mobileWidth: "w-[84%]",
+    mobileAlign: "self-start",
   },
   {
     id: "casa-terra",
+    num: "03",
     title: "Casa Terra",
     location: "Alibaug, Maharashtra",
+    year: "2025",
     category: "Residential Villa",
     image: "/projects/project-4.jpg",
     aspect: "aspect-[3/4]",
+    mobileWidth: "w-[74%]",
+    mobileAlign: "self-start",
   },
   {
     id: "studio-nube",
+    num: "05",
     title: "Studio Nube",
     location: "Bengaluru, Karnataka",
+    year: "2025",
     category: "Workspace & Atelier",
     image: "/projects/project-5.jpg",
     aspect: "aspect-[4/3]",
+    mobileWidth: "w-[84%]",
+    mobileAlign: "self-start",
   },
   {
     id: "monolith-residence",
+    num: "07",
     title: "The Monolith Residence",
     location: "Hyderabad, Telangana",
+    year: "2024",
     category: "Contemporary Living",
     image: "/projects/project-7.jpg",
     aspect: "aspect-[3/4]",
+    mobileWidth: "w-[74%]",
+    mobileAlign: "self-start",
   },
 ];
 
-const PROJECTS_COL_2 = [
+const PROJECTS_COL_2: ProjectItem[] = [
   {
     id: "block-west",
+    num: "02",
     title: "Block West",
     location: "Jalgaon, Maharashtra",
+    year: "2026",
     category: "Timber Architecture",
     image: "/projects/project-2.jpg",
     aspect: "aspect-[3/4]",
+    mobileWidth: "w-[74%]",
+    mobileAlign: "self-end ml-auto",
   },
   {
     id: "glass-house",
+    num: "04",
     title: "The Glass House",
     location: "Coimbatore, Tamil Nadu",
+    year: "2025",
     category: "Pavilion Design",
     image: "/projects/project-3.jpg",
     aspect: "aspect-[4/3]",
+    mobileWidth: "w-[84%]",
+    mobileAlign: "self-end ml-auto",
   },
   {
     id: "komorebi-courtyard",
+    num: "06",
     title: "Komorebi Courtyard",
     location: "Kochi, Kerala",
+    year: "2025",
     category: "Landscape & Living",
     image: "/projects/project-6.jpg",
     aspect: "aspect-[4/3]",
+    mobileWidth: "w-[80%]",
+    mobileAlign: "self-end ml-auto",
   },
   {
     id: "horizon-atelier",
+    num: "08",
     title: "Horizon Atelier",
     location: "Goa",
+    year: "2024",
     category: "Design Studio",
     image: "/projects/project-8.jpg",
     aspect: "aspect-[3/4]",
+    mobileWidth: "w-[74%]",
+    mobileAlign: "self-end ml-auto",
   },
+];
+
+// Interleaved list for mobile view matching OH Architecture's asymmetric rhythm:
+// 01 Left (84%), 02 Right (74%), 03 Left (74%), 04 Right (84%), 05 Left (84%), 06 Right (80%), 07 Left (74%), 08 Right (74%)
+const ALL_MOBILE_PROJECTS: ProjectItem[] = [
+  PROJECTS_COL_1[0], // 01 OJAS 24 (4/3, left)
+  PROJECTS_COL_2[0], // 02 Block West (3/4, right)
+  PROJECTS_COL_1[1], // 03 Casa Terra (3/4, left)
+  PROJECTS_COL_2[1], // 04 The Glass House (4/3, right)
+  PROJECTS_COL_1[2], // 05 Studio Nube (4/3, left)
+  PROJECTS_COL_2[2], // 06 Komorebi Courtyard (4/3, right)
+  PROJECTS_COL_1[3], // 07 The Monolith Residence (3/4, left)
+  PROJECTS_COL_2[3], // 08 Horizon Atelier (3/4, right)
 ];
 
 export default function Projects() {
@@ -124,29 +182,31 @@ export default function Projects() {
         }
       }
 
-      // 2. Center-Proximity Lens Scaling & Parallax Drift on each card
-      cardRefs.current.forEach((cardEl) => {
-        if (!cardEl) return;
-        const rect = cardEl.getBoundingClientRect();
-        const cardCenterY = rect.top + rect.height / 2;
+      // 2. Center-Proximity Lens Scaling & Parallax Drift on each card (Desktop only)
+      if (window.innerWidth >= 640) {
+        cardRefs.current.forEach((cardEl) => {
+          if (!cardEl) return;
+          const rect = cardEl.getBoundingClientRect();
+          const cardCenterY = rect.top + rect.height / 2;
 
-        // Radial vertical distance from card center to viewport center
-        const distance = Math.abs(cardCenterY - viewportCenterY);
-        const maxThreshold = viewportHeight * 0.85;
-        const ratio = Math.min(1, Math.max(0, distance / maxThreshold));
+          // Radial vertical distance from card center to viewport center
+          const distance = Math.abs(cardCenterY - viewportCenterY);
+          const maxThreshold = viewportHeight * 0.85;
+          const ratio = Math.min(1, Math.max(0, distance / maxThreshold));
 
-        // Scale: 1.02 at focal center, smooth contraction to 0.90 towards edges
-        const scale = 1.02 - ratio * 0.12;
+          // Scale: 1.02 at focal center, smooth contraction to 0.90 towards edges
+          const scale = 1.02 - ratio * 0.12;
 
-        // Subtle parallax displacement (drift)
-        const driftY = (cardCenterY < viewportCenterY ? -1 : 1) * ratio * 14;
+          // Subtle parallax displacement (drift)
+          const driftY = (cardCenterY < viewportCenterY ? -1 : 1) * ratio * 14;
 
-        // Soft optical depth fade: 1.0 at center, 0.75 near edges
-        const opacity = 1 - ratio * 0.25;
+          // Soft optical depth fade: 1.0 at center, 0.75 near edges
+          const opacity = 1 - ratio * 0.25;
 
-        cardEl.style.transform = `scale(${scale.toFixed(3)}) translateY(${driftY.toFixed(1)}px)`;
-        cardEl.style.opacity = opacity.toFixed(3);
-      });
+          cardEl.style.transform = `scale(${scale.toFixed(3)}) translateY(${driftY.toFixed(1)}px)`;
+          cardEl.style.opacity = opacity.toFixed(3);
+        });
+      }
     };
 
     const onScroll = () => {
@@ -254,15 +314,54 @@ export default function Projects() {
             </div>
           </aside>
 
-          {/* ---------------- RIGHT COLUMN: SCROLLING TWO-COLUMN PROJECTS ---------------- */}
+          {/* ---------------- RIGHT COLUMN: SCROLLING PROJECTS ---------------- */}
           <div className="w-full lg:w-[62%] xl:w-[66%]">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-start">
-              
+            
+            {/* MOBILE ONLY: OH Architecture Asymmetric Editorial Staggered Feed */}
+            <div className="flex flex-col gap-10 sm:hidden w-full">
+              {ALL_MOBILE_PROJECTS.map((project) => (
+                <a
+                  key={`mobile-${project.id}`}
+                  href={`/projects/${project.id}`}
+                  className={`group flex flex-col ${project.mobileWidth} ${project.mobileAlign}`}
+                >
+                  <div
+                    className={`relative w-full ${project.aspect} overflow-hidden bg-neutral-100 rounded-none shadow-sm`}
+                  >
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      sizes="85vw"
+                      className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                    />
+                  </div>
+                  {/* OH-style Project Label: (01) TITLE on left, YEAR on right */}
+                  <div className="pt-2.5 flex items-baseline justify-between select-none">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-bold text-[13px] text-black">
+                        ({project.num})
+                      </span>
+                      <h3 className="font-bold text-[13px] uppercase text-black tracking-[-0.01em]">
+                        {project.title}
+                      </h3>
+                    </div>
+                    <span className="font-medium text-[13px] text-black/70">
+                      {project.year}
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+
+            {/* DESKTOP ONLY: Two-column Staggered Grid */}
+            <div className="hidden sm:grid sm:grid-cols-2 gap-8 sm:gap-10 lg:gap-12 items-start w-full">
               {/* Staggered Column 1 */}
               <div className="flex flex-col gap-12 sm:gap-16 lg:gap-20">
                 {PROJECTS_COL_1.map((project, idx) => (
-                  <article
+                  <a
                     key={project.id}
+                    href={`/projects/${project.id}`}
                     ref={(el) => {
                       cardRefs.current[idx * 2] = el;
                     }}
@@ -280,28 +379,34 @@ export default function Projects() {
                         src={project.image}
                         alt={project.title}
                         fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 36vw"
+                        sizes="(max-width: 1024px) 50vw, 36vw"
                         className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                       />
                     </div>
-                    {/* Project Label (Always cleanly visible, no text hiding) */}
-                    <div className="pt-3 flex flex-col">
-                      <h3 className="text-[14px] sm:text-[15px] font-normal text-black group-hover:text-black/70 transition-colors duration-150">
-                        {project.title}
-                      </h3>
-                      <p className="text-[12px] sm:text-[13px] text-neutral-500 font-normal">
-                        {project.location}
-                      </p>
+                    {/* OH-style Project Label */}
+                    <div className="pt-3 flex items-baseline justify-between select-none">
+                      <div className="flex items-baseline gap-2.5">
+                        <span className="font-bold text-[14px] text-black">
+                          ({project.num})
+                        </span>
+                        <h3 className="font-bold text-[14px] uppercase text-black tracking-[-0.01em] group-hover:text-black/70 transition-colors duration-150">
+                          {project.title}
+                        </h3>
+                      </div>
+                      <span className="font-medium text-[13px] text-black/70 font-mono">
+                        {project.year}
+                      </span>
                     </div>
-                  </article>
+                  </a>
                 ))}
               </div>  
 
               {/* Staggered Column 2 (Offset downward for architectural asymmetry) */}
               <div className="flex flex-col gap-12 sm:gap-16 lg:gap-20 sm:mt-16 lg:mt-24">
                 {PROJECTS_COL_2.map((project, idx) => (
-                  <article
+                  <a
                     key={project.id}
+                    href={`/projects/${project.id}`}
                     ref={(el) => {
                       cardRefs.current[idx * 2 + 1] = el;
                     }}
@@ -319,24 +424,29 @@ export default function Projects() {
                         src={project.image}
                         alt={project.title}
                         fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 36vw"
+                        sizes="(max-width: 1024px) 50vw, 36vw"
                         className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                       />
                     </div>
-                    {/* Project Label (Always cleanly visible, no text hiding) */}
-                    <div className="pt-3 flex flex-col">
-                      <h3 className="text-[14px] sm:text-[15px] font-normal text-black group-hover:text-black/70 transition-colors duration-150">
-                        {project.title}
-                      </h3>
-                      <p className="text-[12px] sm:text-[13px] text-neutral-500 font-normal">
-                        {project.location}
-                      </p>
+                    {/* OH-style Project Label */}
+                    <div className="pt-3 flex items-baseline justify-between select-none">
+                      <div className="flex items-baseline gap-2.5">
+                        <span className="font-bold text-[14px] text-black">
+                          ({project.num})
+                        </span>
+                        <h3 className="font-bold text-[14px] uppercase text-black tracking-[-0.01em] group-hover:text-black/70 transition-colors duration-150">
+                          {project.title}
+                        </h3>
+                      </div>
+                      <span className="font-medium text-[13px] text-black/70 font-mono">
+                        {project.year}
+                      </span>
                     </div>
-                  </article>
+                  </a>
                 ))}
               </div>
-
             </div>
+
           </div>
 
         </div>
